@@ -23,10 +23,10 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from matplotlib.backends.backend_pdf import PdfPages
 
 from delta.extensions.sources.tiff import TiffImage
+
 
 def plot_band(names, band):
     imgs = [TiffImage(n) for n in names]
@@ -36,13 +36,14 @@ def plot_band(names, band):
         data = data[data > 0.0]
         data[data > max_value] = max_value
         plt.hist(data, bins=200, alpha=0.5)
-        plt.title('Band ' + str(band))
+        plt.title("Band " + str(band))
     pdf.savefig()
     plt.close()
 
-assert len(sys.argv) > 1, 'No  input tiffs specified.'
 
-with PdfPages('output.pdf') as pdf:
+assert len(sys.argv) > 1, "No  input tiffs specified."
+
+with PdfPages("output.pdf") as pdf:
     a = TiffImage(sys.argv[1])
     for i in range(a.num_bands()):
         plot_band(sys.argv[1:], i)

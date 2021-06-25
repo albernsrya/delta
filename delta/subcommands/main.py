@@ -18,19 +18,21 @@
 Main delta command, calls subcommands.
 """
 
-import sys
 import argparse
+import sys
 
-from delta.config import config
 import delta.config.modules
+from delta.config import config
 from delta.subcommands import commands
+
 
 def main(args):
     """
     DELTA main function.
     """
     delta.config.modules.register_all()
-    parser = argparse.ArgumentParser(description='DELTA Machine Learning Toolkit')
+    parser = argparse.ArgumentParser(
+        description="DELTA Machine Learning Toolkit")
     subparsers = parser.add_subparsers()
 
     for d in commands.SETUP_COMMANDS:
@@ -42,7 +44,7 @@ def main(args):
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    if not hasattr(options, 'function'):
+    if not hasattr(options, "function"):
         parser.print_help(sys.stderr)
         sys.exit(1)
 

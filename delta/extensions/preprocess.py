@@ -14,7 +14,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#pylint:disable=unused-argument
+# pylint:disable=unused-argument
 """
 Various helpful preprocessing functions.
 
@@ -27,13 +27,16 @@ import numpy as np
 
 from delta.config.extensions import register_preprocess
 
-__DEFAULT_SCALE_FACTORS = {'tiff' : 1024.0,
-                           'worldview' : 1024.0,
-                           'landsat' : 120.0,
-                           'npy' : None,
-                           'sentinel1' : None}
+__DEFAULT_SCALE_FACTORS = {
+    "tiff": 1024.0,
+    "worldview": 1024.0,
+    "landsat": 120.0,
+    "npy": None,
+    "sentinel1": None,
+}
 
-def scale(image_type, factor='default'):
+
+def scale(image_type, factor="default"):
     """
     Divides by a given scale factor.
 
@@ -43,10 +46,11 @@ def scale(image_type, factor='default'):
         Scale factor to divide by. 'default' will scale by an image type specific
         default amount.
     """
-    if factor == 'default':
+    if factor == "default":
         factor = __DEFAULT_SCALE_FACTORS[image_type]
     factor = np.float32(factor)
-    return (lambda data, _, dummy: data / factor)
+    return lambda data, _, dummy: data / factor
+
 
 def offset(image_type, factor):
     """
@@ -60,6 +64,7 @@ def offset(image_type, factor):
     factor = np.float32(factor)
     return lambda data, _, dummy: data + factor
 
+
 def clip(image_type, bounds):
     """
     Clips all pixel values within a range.
@@ -70,22 +75,26 @@ def clip(image_type, bounds):
         List of two floats to clip all values between.
     """
     if isinstance(bounds, list):
-        assert len(bounds) == 2, 'Bounds must have two items.'
+        assert len(bounds) == 2, "Bounds must have two items."
     else:
         bounds = (bounds, bounds)
     bounds = (np.float32(bounds[0]), np.float32(bounds[1]))
     return lambda data, _, dummy: np.clip(data, bounds[0], bounds[1])
+
 
 def cbrt(image_type):
     """
     Cubic root.
     """
     return lambda data, _, dummy: np.cbrt(data)
+
+
 def sqrt(image_type):
     """
     Square root.
     """
     return lambda data, _, dummy: np.sqrt(data)
+
 
 def gauss_mult_noise(image_type, stddev):
     """
@@ -96,7 +105,9 @@ def gauss_mult_noise(image_type, stddev):
     stddev: float
         Standard deviation of distribution to sample from.
     """
-    return lambda data, _, dummy: data * np.random.normal(1.0, stddev, data.shape)
+    return lambda data, _, dummy: data * np.random.normal(
+        1.0, stddev, data.shape)
+
 
 def substitute(image_type, mapping):
     """
@@ -111,10 +122,11 @@ def substitute(image_type, mapping):
     """
     return lambda data, _, dummy: np.take(mapping, data)
 
-register_preprocess('scale', scale)
-register_preprocess('offset', offset)
-register_preprocess('clip', clip)
-register_preprocess('sqrt', sqrt)
-register_preprocess('cbrt', cbrt)
-register_preprocess('gauss_mult_noise', gauss_mult_noise)
-register_preprocess('substitute', substitute)
+
+register_preprocess("scale", scale)
+register_preprocess("offset", offset)
+register_preprocess("clip", clip)
+register_preprocess("sqrt", sqrt)
+register_preprocess("cbrt", cbrt)
+register_preprocess("gauss_mult_noise", gauss_mult_noise)
+register_preprocess("substitute", substitute)

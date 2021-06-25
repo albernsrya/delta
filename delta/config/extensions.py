@@ -26,7 +26,7 @@ the extensions can be used like existing DELTA options.
 All extensions can take keyword arguments that can be specified in the config file.
 """
 
-#pylint:disable=global-statement
+# pylint:disable=global-statement
 
 import importlib
 
@@ -39,6 +39,7 @@ __metrics = {}
 __callbacks = {}
 __prep_funcs = {}
 
+
 def __initialize():
     """
     This function is called before each use of extensions to import
@@ -49,7 +50,8 @@ def __initialize():
         ext = __extensions_to_load.pop()
         importlib.import_module(ext)
 
-def register_extension(name : str):
+
+def register_extension(name: str):
     """
     Register an extension python module.
     For internal use --- users should use the config files.
@@ -62,7 +64,8 @@ def register_extension(name : str):
     global __extensions_to_load
     __extensions_to_load.add(name)
 
-def register_layer(layer_type : str, layer_constructor):
+
+def register_layer(layer_type: str, layer_constructor):
     """
     Register a custom layer for use by DELTA.
 
@@ -82,7 +85,8 @@ def register_layer(layer_type : str, layer_constructor):
     global __layers
     __layers[layer_type] = layer_constructor
 
-def register_image_reader(image_type : str, image_class):
+
+def register_image_reader(image_type: str, image_class):
     """
     Register a custom image type for reading by DELTA.
 
@@ -96,7 +100,8 @@ def register_image_reader(image_type : str, image_class):
     global __readers
     __readers[image_type] = image_class
 
-def register_image_writer(image_type : str, writer_class):
+
+def register_image_writer(image_type: str, writer_class):
     """
     Register a custom image type for writing by DELTA.
 
@@ -110,7 +115,8 @@ def register_image_writer(image_type : str, writer_class):
     global __writers
     __writers[image_type] = writer_class
 
-def register_loss(loss_type : str, custom_loss):
+
+def register_loss(loss_type: str, custom_loss):
     """
     Register a custom loss function for use by DELTA.
 
@@ -127,7 +133,8 @@ def register_loss(loss_type : str, custom_loss):
     global __losses
     __losses[loss_type] = custom_loss
 
-def register_metric(metric_type : str, custom_metric):
+
+def register_metric(metric_type: str, custom_metric):
     """
     Register a custom metric for use by DELTA.
 
@@ -141,7 +148,8 @@ def register_metric(metric_type : str, custom_metric):
     global __metrics
     __metrics[metric_type] = custom_metric
 
-def register_callback(cb_type : str, cb):
+
+def register_callback(cb_type: str, cb):
     """
     Register a custom training callback for use by DELTA.
 
@@ -156,7 +164,8 @@ def register_callback(cb_type : str, cb):
     global __callbacks
     __callbacks[cb_type] = cb
 
-def register_preprocess(function_name : str, prep_function):
+
+def register_preprocess(function_name: str, prep_function):
     """
     Register a preprocessing function for use in delta.
 
@@ -172,7 +181,8 @@ def register_preprocess(function_name : str, prep_function):
     global __prep_funcs
     __prep_funcs[function_name] = prep_function
 
-def layer(layer_type : str):
+
+def layer(layer_type: str):
     """
     Retrieve a custom layer by name.
 
@@ -189,7 +199,8 @@ def layer(layer_type : str):
     __initialize()
     return __layers.get(layer_type)
 
-def loss(loss_type : str):
+
+def loss(loss_type: str):
     """
     Retrieve a custom loss by name.
 
@@ -206,7 +217,8 @@ def loss(loss_type : str):
     __initialize()
     return __losses.get(loss_type)
 
-def metric(metric_type : str):
+
+def metric(metric_type: str):
     """
     Retrieve a custom metric by name.
 
@@ -223,7 +235,8 @@ def metric(metric_type : str):
     __initialize()
     return __metrics.get(metric_type)
 
-def callback(cb_type : str):
+
+def callback(cb_type: str):
     """
     Retrieve a custom callback by name.
 
@@ -240,7 +253,8 @@ def callback(cb_type : str):
     __initialize()
     return __callbacks.get(cb_type)
 
-def preprocess_function(prep_type : str):
+
+def preprocess_function(prep_type: str):
     """
     Retrieve a custom preprocessing function by name.
 
@@ -257,7 +271,8 @@ def preprocess_function(prep_type : str):
     __initialize()
     return __prep_funcs.get(prep_type)
 
-def image_reader(reader_type : str):
+
+def image_reader(reader_type: str):
     """
     Get the reader of the given type.
 
@@ -274,7 +289,8 @@ def image_reader(reader_type : str):
     __initialize()
     return __readers.get(reader_type)
 
-def image_writer(writer_type : str):
+
+def image_writer(writer_type: str):
     """
     Get the writer of the given type.
 
@@ -290,6 +306,7 @@ def image_writer(writer_type : str):
     """
     __initialize()
     return __writers.get(writer_type)
+
 
 def custom_objects():
     """

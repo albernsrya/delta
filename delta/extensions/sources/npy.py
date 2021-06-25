@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Read data in numpy arrays.
 """
@@ -26,11 +25,18 @@ import numpy as np
 
 from delta.imagery import delta_image
 
+
 class NumpyImage(delta_image.DeltaImage):
     """
     Load a numpy array as an image.
     """
-    def __init__(self, data: Optional[np.ndarray]=None, path: Optional[str]=None, nodata_value=None):
+
+    def __init__(
+        self,
+        data: Optional[np.ndarray] = None,
+        path: Optional[str] = None,
+        nodata_value=None,
+    ):
         """
         Parameters
         ----------
@@ -55,9 +61,12 @@ class NumpyImage(delta_image.DeltaImage):
 
     def _read(self, roi, bands, buf=None):
         if buf is None:
-            buf = np.zeros(shape=(roi.width(), roi.height(), self.num_bands() ), dtype=self._data.dtype)
+            buf = np.zeros(
+                shape=(roi.width(), roi.height(), self.num_bands()),
+                dtype=self._data.dtype,
+            )
         (min_x, max_x, min_y, max_y) = roi.bounds()
-        buf = self._data[min_y:max_y,min_x:max_x,:]
+        buf = self._data[min_y:max_y, min_x:max_x, :]
         return buf
 
     def size(self):
@@ -69,6 +78,7 @@ class NumpyImage(delta_image.DeltaImage):
     def dtype(self):
         return self._data.dtype
 
+
 class NumpyWriter(delta_image.DeltaImageWriter):
     def __init__(self):
         self._buffer = None
@@ -77,7 +87,7 @@ class NumpyWriter(delta_image.DeltaImageWriter):
         self._buffer = np.zeros(shape=size, dtype=numpy_dtype)
 
     def write(self, data, x, y):
-        self._buffer[x:x+data.shape[0], y:y+data.shape[1]] = data
+        self._buffer[x:x + data.shape[0], y:y + data.shape[1]] = data
 
     def close(self):
         pass

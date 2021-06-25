@@ -18,34 +18,32 @@
 Module to install all extensions that come with DELTA by default.
 """
 
-from delta.config.extensions import register_extension, register_image_reader, register_image_writer
+from delta.config.extensions import (register_extension, register_image_reader,
+                                     register_image_writer)
 
-from .sources import tiff
-from .sources import landsat
-from .sources import npy
-from .sources import worldview
-from .sources import sentinel1
+from .sources import landsat, npy, sentinel1, tiff, worldview
+
 
 def initialize():
     """
     Register all default extensions.
     """
-    register_extension('delta.extensions.callbacks')
+    register_extension("delta.extensions.callbacks")
 
-    register_extension('delta.extensions.layers.pretrained')
-    register_extension('delta.extensions.layers.gaussian_sample')
-    register_extension('delta.extensions.layers.efficientnet')
-    register_extension('delta.extensions.layers.simple')
+    register_extension("delta.extensions.layers.pretrained")
+    register_extension("delta.extensions.layers.gaussian_sample")
+    register_extension("delta.extensions.layers.efficientnet")
+    register_extension("delta.extensions.layers.simple")
 
-    register_extension('delta.extensions.losses')
-    register_extension('delta.extensions.metrics')
-    register_extension('delta.extensions.preprocess')
+    register_extension("delta.extensions.losses")
+    register_extension("delta.extensions.metrics")
+    register_extension("delta.extensions.preprocess")
 
-    register_image_reader('tiff', tiff.TiffImage)
-    register_image_reader('npy', npy.NumpyImage)
-    register_image_reader('landsat', landsat.LandsatImage)
-    register_image_reader('worldview', worldview.WorldviewImage)
-    register_image_reader('sentinel1', sentinel1.Sentinel1Image)
+    register_image_reader("tiff", tiff.TiffImage)
+    register_image_reader("npy", npy.NumpyImage)
+    register_image_reader("landsat", landsat.LandsatImage)
+    register_image_reader("worldview", worldview.WorldviewImage)
+    register_image_reader("sentinel1", sentinel1.Sentinel1Image)
 
-    register_image_writer('tiff', tiff.TiffWriter)
-    register_image_writer('npy', npy.NumpyWriter)
+    register_image_writer("tiff", tiff.TiffWriter)
+    register_image_writer("npy", npy.NumpyWriter)

@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Custom callbacks that come with DELTA.
 """
@@ -25,13 +24,21 @@ import tensorflow.keras.callbacks
 from delta.config.extensions import register_callback
 from delta.ml.train import ContinueTrainingException
 
+
 class SetTrainable(tensorflow.keras.callbacks.Callback):
     """
     Changes whether a given layer is trainable during training.
 
     This is useful for transfer learning, to do an initial training and then allow fine-tuning.
     """
-    def __init__(self, layer_name: str, epoch: int, trainable: bool=True, learning_rate: float=None):
+
+    def __init__(
+        self,
+        layer_name: str,
+        epoch: int,
+        trainable: bool = True,
+        learning_rate: float = None,
+    ):
         """
         Parameters
         ----------
@@ -55,13 +62,16 @@ class SetTrainable(tensorflow.keras.callbacks.Callback):
         if epoch == self._epoch:
             if self._triggered:
                 return
-            self._triggered = True # don't repeat twice
+            self._triggered = True  # don't repeat twice
             l = self.model.get_layer(self._layer_name)
             l.trainable = True
             # have to abort, recompile changed model, and continue training
-            raise ContinueTrainingException(completed_epochs=epoch, recompile_model=True, learning_rate=self._lr)
+            raise ContinueTrainingException(completed_epochs=epoch,
+                                            recompile_model=True,
+                                            learning_rate=self._lr)
 
-def ExponentialLRScheduler(start_epoch: int=10, multiplier: float=0.95):
+
+def ExponentialLRScheduler(start_epoch: int = 10, multiplier: float = 0.95):
     """
     Schedule the learning rate exponentially.
 
@@ -76,7 +86,9 @@ def ExponentialLRScheduler(start_epoch: int=10, multiplier: float=0.95):
         if epoch < start_epoch:
             return lr
         return multiplier * lr
+
     return tensorflow.keras.callbacks.LearningRateScheduler(schedule)
 
-register_callback('SetTrainable', SetTrainable)
-register_callback('ExponentialLRScheduler', ExponentialLRScheduler)
+
+register_callback("SetTrainable", SetTrainable)
+register_callback("ExponentialLRScheduler", ExponentialLRScheduler)

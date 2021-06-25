@@ -14,20 +14,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Base classes for reading and writing images.
 """
 
-from abc import ABC, abstractmethod
 import concurrent.futures
 import copy
 import functools
+from abc import ABC, abstractmethod
 from typing import Callable, Iterator, List, Tuple
 
 import numpy as np
 
 from delta.imagery import rectangle, utilities
+
 
 class DeltaImage(ABC):
     """
@@ -35,6 +35,7 @@ class DeltaImage(ABC):
     to support new data types. A variety of image types are implemented in
     `delta.extensions.sources`.
     """
+
     def __init__(self, nodata_value=None):
         """
         Parameters
@@ -45,7 +46,12 @@ class DeltaImage(ABC):
         self.__preprocess_function = None
         self.__nodata_value = nodata_value
 
-    def read(self, roi: rectangle.Rectangle=None, bands: List[int]=None, buf: np.ndarray=None) -> np.ndarray:
+    def read(
+        self,
+        roi: rectangle.Rectangle = None,
+        bands: List[int] = None,
+        buf: np.ndarray = None,
+    ) -> np.ndarray:
         """
         Reads the image in [row, col, band] indexing.
 
@@ -67,23 +73,39 @@ class DeltaImage(ABC):
             A buffer containing the requested part of the image.
         """
         if roi is None:
-            roi = rectangle.Rectangle(0, 0, width=self.width(), height=self.height())
+            roi = rectangle.Rectangle(0,
+                                      0,
+                                      width=self.width(),
+                                      height=self.height())
         else:
-            if roi.min_x < 0 or roi.min_y < 0 or roi.max_x > self.width() or roi.max_y > self.height():
-                raise IndexError('Rectangle (%d, %d, %d, %d) outside of bounds (%d, %d).' %
-                                 (roi.min_x, roi.min_y, roi.max_x, roi.max_y, self.width(), self.height()))
+            if (roi.min_x < 0 or roi.min_y < 0 or roi.max_x > self.width()
+                    or roi.max_y > self.height()):
+                raise IndexError(
+                    "Rectangle (%d, %d, %d, %d) outside of bounds (%d, %d)." %
+                    (
+                        roi.min_x,
+                        roi.min_y,
+                        roi.max_x,
+                        roi.max_y,
+                        self.width(),
+                        self.height(),
+                    ))
         if bands is None:
             bands = range(self.num_bands())
         if isinstance(bands, int):
             result = self._read(roi, [bands], buf)
-            result = result[:, :, 0] # reduce dimensions
+            result = result[:, :, 0]  # reduce dimensions
         else:
             result = self._read(roi, bands, buf)
         if self.__preprocess_function:
             return self.__preprocess_function(result, roi, bands)
         return result
 
-    def set_preprocess(self, callback: Callable[[np.ndarray, rectangle.Rectangle, List[int]], np.ndarray]):
+    def set_preprocess(
+        self,
+        callback: Callable[[np.ndarray, rectangle.Rectangle, List[int]],
+                           np.ndarray],
+    ):
         """
         Set a preproprocessing function callback to be applied to the results of
         all reads on the image.
@@ -97,7 +119,9 @@ class DeltaImage(ABC):
         """
         self.__preprocess_function = callback
 
-    def get_preprocess(self) -> Callable[[np.ndarray, rectangle.Rectangle, List[int]], np.ndarray]:
+    def get_preprocess(
+        self,
+    ) -> Callable[[np.ndarray, rectangle.Rectangle, List[int]], np.ndarray]:
         """
         Returns
         -------
@@ -115,7 +139,10 @@ class DeltaImage(ABC):
         return self.__nodata_value
 
     @abstractmethod
-    def _read(self, roi: rectangle.Rectangle, bands: List[int], buf: np.ndarray=None) -> np.ndarray:
+    def _read(self,
+              roi: rectangle.Rectangle,
+              bands: List[int],
+              buf: np.ndarray = None) -> np.ndarray:
         """
         Read the image.
 
@@ -136,7 +163,7 @@ class DeltaImage(ABC):
             The relevant part of the image as a numpy array.
         """
 
-    def metadata(self): #pylint:disable=no-self-use
+    def metadata(self):  # pylint:disable=no-self-use
         """
         Returns
         -------
@@ -171,7 +198,9 @@ class DeltaImage(ABC):
             The underlying data type of the image.
         """
 
-    def block_aligned_roi(self, desired_roi: rectangle.Rectangle) -> rectangle.Rectangle:#pylint:disable=no-self-use
+    def block_aligned_roi(
+        self, desired_roi: rectangle.Rectangle
+    ) -> rectangle.Rectangle:  # pylint:disable=no-self-use
         """
         Parameters
         ----------
@@ -185,7 +214,7 @@ class DeltaImage(ABC):
         """
         return desired_roi
 
-    def block_size(self): #pylint: disable=no-self-use
+    def block_size(self):  # pylint: disable=no-self-use
         """
         Returns
         -------
@@ -212,8 +241,15 @@ class DeltaImage(ABC):
         """
         return self.size()[1]
 
-    def tiles(self, shape, overlap_shape=(0, 0), partials: bool=True, min_shape=(0, 0),
-              partials_overlap: bool=False, by_block=False):
+    def tiles(
+            self,
+            shape,
+            overlap_shape=(0, 0),
+            partials: bool = True,
+            min_shape=(0, 0),
+            partials_overlap: bool = False,
+            by_block=False,
+    ):
         """
         Splits the image into tiles with the given properties.
 
@@ -240,13 +276,22 @@ class DeltaImage(ABC):
             List of ROIs. If `by_block` is true, returns a list of (Rectangle, List[Rectangle])
             instead, where the first rectangle is a larger block containing multiple tiles in a list.
         """
-        input_bounds = rectangle.Rectangle(0, 0, max_x=self.width(), max_y=self.height())
-        return input_bounds.make_tile_rois(shape, overlap_shape=overlap_shape, include_partials=partials,
-                                           min_shape=min_shape, partials_overlap=partials_overlap,
-                                           by_block=by_block)
+        input_bounds = rectangle.Rectangle(0,
+                                           0,
+                                           max_x=self.width(),
+                                           max_y=self.height())
+        return input_bounds.make_tile_rois(
+            shape,
+            overlap_shape=overlap_shape,
+            include_partials=partials,
+            min_shape=min_shape,
+            partials_overlap=partials_overlap,
+            by_block=by_block,
+        )
 
-    def roi_generator(self, requested_rois: Iterator[rectangle.Rectangle]) -> \
-                  Iterator[Tuple[rectangle.Rectangle, np.ndarray, int, int]]:
+    def roi_generator(
+        self, requested_rois: Iterator[rectangle.Rectangle]
+    ) -> Iterator[Tuple[rectangle.Rectangle, np.ndarray, int, int]]:
         """
         Generator that yields image blocks of the requested rois.
 
@@ -265,10 +310,14 @@ class DeltaImage(ABC):
         """
         block_rois = copy.copy(requested_rois)
 
-        whole_bounds = rectangle.Rectangle(0, 0, width=self.width(), height=self.height())
+        whole_bounds = rectangle.Rectangle(0,
+                                           0,
+                                           width=self.width(),
+                                           height=self.height())
         for roi in requested_rois:
             if not whole_bounds.contains_rect(roi):
-                raise Exception('Roi outside image bounds: ' + str(roi) + str(whole_bounds))
+                raise Exception("Roi outside image bounds: " + str(roi) +
+                                str(whole_bounds))
 
         # gdal doesn't work reading multithreading. But this let's a thread
         # take care of IO input while we do computation.
@@ -299,7 +348,8 @@ class DeltaImage(ABC):
         exe = concurrent.futures.ThreadPoolExecutor(1)
         NUM_AHEAD = 2
         for i in range(min(NUM_AHEAD, len(jobs))):
-            pending.append(exe.submit(functools.partial(self.read, jobs[i][0])))
+            pending.append(exe.submit(functools.partial(self.read,
+                                                        jobs[i][0])))
         num_remaining = total_rois
         for (i, (read_roi, rois)) in enumerate(jobs):
             buf = pending.pop(0).result()
@@ -307,14 +357,22 @@ class DeltaImage(ABC):
                 x0 = roi.min_x - read_roi.min_x
                 y0 = roi.min_y - read_roi.min_y
                 num_remaining -= 1
-                yield (roi, buf[x0:x0 + roi.width(), y0:y0 + roi.height(), :],
-                       (total_rois - num_remaining, total_rois))
+                yield (
+                    roi,
+                    buf[x0:x0 + roi.width(), y0:y0 + roi.height(), :],
+                    (total_rois - num_remaining, total_rois),
+                )
             if i + NUM_AHEAD < len(jobs):
-                pending.append(exe.submit(functools.partial(self.read, jobs[i + NUM_AHEAD][0])))
+                pending.append(
+                    exe.submit(
+                        functools.partial(self.read, jobs[i + NUM_AHEAD][0])))
 
-    def process_rois(self, requested_rois: Iterator[rectangle.Rectangle],
-                     callback_function: Callable[[rectangle.Rectangle, np.ndarray], None],
-                     show_progress: bool=False) -> None:
+    def process_rois(
+        self,
+        requested_rois: Iterator[rectangle.Rectangle],
+        callback_function: Callable[[rectangle.Rectangle, np.ndarray], None],
+        show_progress: bool = False,
+    ) -> None:
         """
         Apply a callback function to a list of ROIs.
 
@@ -331,9 +389,12 @@ class DeltaImage(ABC):
         for (roi, buf, (i, total)) in self.roi_generator(requested_rois):
             callback_function(roi, buf)
             if show_progress:
-                utilities.progress_bar('%d / %d' % (i, total), i / total, prefix='Blocks Processed:')
+                utilities.progress_bar("%d / %d" % (i, total),
+                                       i / total,
+                                       prefix="Blocks Processed:")
         if show_progress:
             print()
+
 
 class DeltaImageWriter(ABC):
     """

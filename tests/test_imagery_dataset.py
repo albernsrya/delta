@@ -15,16 +15,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#pylint: disable=redefined-outer-name
+# pylint: disable=redefined-outer-name
 import os
 
-import pytest
-import numpy as np
-
 import conftest
+import numpy as np
+import pytest
 
 from delta.config import config
 from delta.imagery import imagery_dataset, rectangle
+
 
 def test_basics(dataset_block_label):
     """
@@ -38,6 +38,7 @@ def test_basics(dataset_block_label):
     assert d.tile_shape() == [256, 1024]
     assert d.tile_overlap() == (0, 0)
 
+
 def test_block_label(dataset_block_label):
     """
     Tests basic functionality of a dataset on 3x3 blocks.
@@ -47,7 +48,7 @@ def test_block_label(dataset_block_label):
         img = image.numpy()
         assert img.dtype == np.float32
         unique = np.unique(img)
-        assert (0 in unique or 1 in unique and len(unique) <= 2)
+        assert 0 in unique or 1 in unique and len(unique) <= 2
         num_data += 1
     num_label = 0
     for label in dataset_block_label.labels():
@@ -80,6 +81,7 @@ def test_block_label(dataset_block_label):
         if v6 or v7 or v8:
             assert label[1, 1] == 0
 
+
 def test_nodata(dataset_block_label):
     """
     Tests that this filters out blocks where labels are all 0.
@@ -92,6 +94,7 @@ def test_nodata(dataset_block_label):
     finally:
         dataset_block_label.label_set().set_nodata_value(None)
 
+
 def test_class_weights(dataset_block_label):
     """
     Tests that this filters out blocks where labels are all 0.
@@ -100,6 +103,7 @@ def test_class_weights(dataset_block_label):
     ds = dataset_block_label.dataset(class_weights=[1.0, 2.0])
     for (_, label, weights) in ds.take(100):
         assert np.all(lookup[label.numpy()] == weights)
+
 
 def test_rectangle():
     """
@@ -133,6 +137,7 @@ def test_rectangle():
     r.expand_to_contain_rect(r2)
     assert r.bounds() == (-5, 15, -5, 15)
 
+
 def test_rectangle_rois():
     """
     Tests make_tile_rois.
@@ -149,16 +154,24 @@ def test_rectangle_rois():
     tiles = r.make_tile_rois((11, 11), include_partials=True)
     assert len(tiles) == 1
     assert tiles[0].bounds() == (0, 10, 0, 10)
-    tiles = r.make_tile_rois((20, 20), include_partials=True, min_shape=(11, 11))
+    tiles = r.make_tile_rois((20, 20),
+                             include_partials=True,
+                             min_shape=(11, 11))
     assert len(tiles) == 0
-    tiles = r.make_tile_rois((20, 20), include_partials=True, min_shape=(10, 10))
+    tiles = r.make_tile_rois((20, 20),
+                             include_partials=True,
+                             min_shape=(10, 10))
     assert len(tiles) == 1
 
     tiles = r.make_tile_rois((6, 6), include_partials=False)
     assert len(tiles) == 1
-    tiles = r.make_tile_rois((6, 6), include_partials=False, overlap_shape=(2, 2))
+    tiles = r.make_tile_rois((6, 6),
+                             include_partials=False,
+                             overlap_shape=(2, 2))
     assert len(tiles) == 4
-    tiles = r.make_tile_rois((6, 6), include_partials=False, partials_overlap=True)
+    tiles = r.make_tile_rois((6, 6),
+                             include_partials=False,
+                             partials_overlap=True)
     assert len(tiles) == 4
     for t in tiles:
         assert t.width() == 6 and t.height() == 6
@@ -168,13 +181,13 @@ def test_rectangle_rois():
     for row in tiles:
         assert len(row) == 2
 
+
 @pytest.fixture(scope="function")
 def autoencoder(all_sources):
     source = all_sources[0]
     conftest.config_reset()
     (image_path, _) = source[0]
-    config.load(yaml_str=
-                '''
+    config.load(yaml_str="""
                 io:
                   cache:
                     dir: %s
@@ -183,12 +196,17 @@ def autoencoder(all_sources):
                     type: %s
                     directory: %s
                     extension: %s
-                    preprocess: ~''' %
-                (os.path.dirname(image_path), source[2], os.path.dirname(image_path), source[1]))
+                    preprocess: ~""" % (
+        os.path.dirname(image_path),
+        source[2],
+        os.path.dirname(image_path),
+        source[1],
+    ))
 
-    dataset = imagery_dataset.AutoencoderDataset(config.dataset.images(),
-                                                 (3, 3), stride=config.train.spec().stride)
+    dataset = imagery_dataset.AutoencoderDataset(
+        config.dataset.images(), (3, 3), stride=config.train.spec().stride)
     return dataset
+
 
 def test_autoencoder(autoencoder):
     """
@@ -197,6 +215,7 @@ def test_autoencoder(autoencoder):
     ds = autoencoder.dataset()
     for (image, label) in ds.take(1000):
         assert (image.numpy() == label.numpy()).all()
+
 
 def test_resume_mode(autoencoder, tmpdir):
     """
