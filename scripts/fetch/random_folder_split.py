@@ -17,67 +17,113 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#pylint: disable=R0914
-
+# pylint: disable=R0914
 """
 Given folders of input image/label files, create a new pair of train/validate
 folders which contain symlinks to random non-overlapping subsets of the input files.
 """
-import os
-import sys
 import argparse
+import os
 import random
+import sys
+
 import yaml
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
+
 
 # TODO: Need a good system for this that handles unpacked images!!!
 def get_label_path(image_name, options):
     """Return the label file path for a given input image or throw if it is
-       not found at the expected location."""
+    not found at the expected location."""
 
-    label_name = image_name.replace(options.image_extension, options.label_extension)
+    label_name = image_name.replace(options.image_extension,
+                                    options.label_extension)
     label_path = os.path.join(options.label_folder, label_name)
     if not os.path.exists(label_path):
-        raise Exception('Expected label file does not exist: ' + label_path)
+        raise Exception("Expected label file does not exist: " + label_path)
     return label_path
 
-def main(argsIn): #pylint: disable=R0912
+
+def main(argsIn):  # pylint: disable=R0912
 
     try:
 
-        usage  = "usage: random_folder_split [options]"
+        usage = "usage: random_folder_split [options]"
         parser = argparse.ArgumentParser(usage=usage)
 
-        parser.add_argument("--image-folder", dest="image_folder", required=True,
-                            help="Folder containing the input image files.")
-        parser.add_argument("--label-folder", dest="label_folder", default=None,
-                            help="Folder containing the input label files.")
+        parser.add_argument(
+            "--image-folder",
+            dest="image_folder",
+            required=True,
+            help="Folder containing the input image files.",
+        )
+        parser.add_argument(
+            "--label-folder",
+            dest="label_folder",
+            default=None,
+            help="Folder containing the input label files.",
+        )
 
-        parser.add_argument("--output-folder", dest="output_folder", required=True,
-                            help="Folder to put the output image/label folders in.")
+        parser.add_argument(
+            "--output-folder",
+            dest="output_folder",
+            required=True,
+            help="Folder to put the output image/label folders in.",
+        )
 
-        parser.add_argument("--validate-fraction", dest="validate_fraction", default=0.3,
-                            type=float, help="Fraction of inputs to use for validation.")
+        parser.add_argument(
+            "--validate-fraction",
+            dest="validate_fraction",
+            default=0.3,
+            type=float,
+            help="Fraction of inputs to use for validation.",
+        )
 
-        parser.add_argument("--image-ext", dest="image_extension", default='.zip',
-                            help="Extension for image files.")
-        parser.add_argument("--label-ext", dest="label_extension", default='.tif',
-                            help="Extension for label files.")
+        parser.add_argument(
+            "--image-ext",
+            dest="image_extension",
+            default=".zip",
+            help="Extension for image files.",
+        )
+        parser.add_argument(
+            "--label-ext",
+            dest="label_extension",
+            default=".tif",
+            help="Extension for label files.",
+        )
 
-        parser.add_argument("--link-folders", action="store_true",
-                            dest="link_folders", default=False,
-                            help="Link the files containing the detected folders")
+        parser.add_argument(
+            "--link-folders",
+            action="store_true",
+            dest="link_folders",
+            default=False,
+            help="Link the files containing the detected folders",
+        )
 
-        parser.add_argument("--image-limit", dest="image_limit", default=None, type=int,
-                            help="Only use this many image files total.")
+        parser.add_argument(
+            "--image-limit",
+            dest="image_limit",
+            default=None,
+            type=int,
+            help="Only use this many image files total.",
+        )
 
-        parser.add_argument("--file-list-path", dest="file_list_path", default=None,
-                            help="Path to text file containing list of image file names to use, one per line.")
+        parser.add_argument(
+            "--file-list-path",
+            dest="file_list_path",
+            default=None,
+            help="Path to text file containing list of image file names to use, one per line.",
+        )
 
-        parser.add_argument("--config-file", dest="config_path", default=None,
-                            help="Make a copy of this config file with paths changed.  The config " +
-                            "file must be fully set up, as only the directory entries will be updated.")
+        parser.add_argument(
+            "--config-file",
+            dest="config_path",
+            default=None,
+            help="Make a copy of this config file with paths changed.  The config "
+            +
+            "file must be fully set up, as only the directory entries will be updated.",
+        )
 
         options = parser.parse_args(argsIn)
 
@@ -86,15 +132,15 @@ def main(argsIn): #pylint: disable=R0912
         return -1
 
     # Set up the output image structure, wiping any existing data there.
-    out_train_folder   = os.path.join(options.output_folder, 'train')
-    out_valid_folder   = os.path.join(options.output_folder, 'validate')
-    train_image_folder = os.path.join(out_train_folder, 'images')
-    train_label_folder = os.path.join(out_train_folder, 'labels')
-    valid_image_folder = os.path.join(out_valid_folder, 'images')
-    valid_label_folder = os.path.join(out_valid_folder, 'labels')
+    out_train_folder = os.path.join(options.output_folder, "train")
+    out_valid_folder = os.path.join(options.output_folder, "validate")
+    train_image_folder = os.path.join(out_train_folder, "images")
+    train_label_folder = os.path.join(out_train_folder, "labels")
+    valid_image_folder = os.path.join(out_valid_folder, "images")
+    valid_label_folder = os.path.join(out_valid_folder, "labels")
 
     if os.path.exists(options.output_folder):
-        os.system('rm -rf ' + options.output_folder)
+        os.system("rm -rf " + options.output_folder)
     os.mkdir(options.output_folder)
     os.mkdir(out_train_folder)
     os.mkdir(out_valid_folder)
@@ -105,14 +151,15 @@ def main(argsIn): #pylint: disable=R0912
         os.mkdir(valid_label_folder)
 
     # Recursively find image files, obtaining the full path for each file.
-    input_image_list = [os.path.join(root, name)
-                        for root, dirs, files in os.walk(options.image_folder)
-                        for name in files
-                        if name.endswith((options.image_extension))]
+    input_image_list = [
+        os.path.join(root, name)
+        for root, dirs, files in os.walk(options.image_folder)
+        for name in files if name.endswith((options.image_extension))
+    ]
 
     images_to_use = []
     if options.file_list_path:
-        with open(options.file_list_path, 'r') as f:
+        with open(options.file_list_path, "r") as f:
             for line in f:
                 images_to_use.append(line.strip())
 
@@ -121,18 +168,19 @@ def main(argsIn): #pylint: disable=R0912
     for image_path in input_image_list:
 
         # If an image list was provided skip images which are not in the list.
-        image_name   = os.path.basename(image_path)
+        image_name = os.path.basename(image_path)
         image_folder = os.path.dirname(image_path)
-        if images_to_use and (os.path.splitext(image_name)[0] not in images_to_use):
+        if images_to_use and (os.path.splitext(image_name)[0]
+                              not in images_to_use):
             continue
 
         # Use for validation or for training?
-        use_for_valid = (random.random() < options.validate_fraction)
+        use_for_valid = random.random() < options.validate_fraction
 
         # Handle the image file
         target_name = image_name
         if options.link_folders:
-            target_name = os.path.basename(image_folder) # Last folder name
+            target_name = os.path.basename(image_folder)  # Last folder name
         if use_for_valid:
             image_dest = os.path.join(valid_image_folder, target_name)
             valid_count += 1
@@ -164,27 +212,31 @@ def main(argsIn): #pylint: disable=R0912
         config_out_path = os.path.join(options.output_folder, config_name)
 
         try:
-            with open(options.config_path, 'r') as f:
+            with open(options.config_path, "r") as f:
                 config_data = yaml.load(f, Loader=yaml.FullLoader)
 
-            config_data['images']['directory'] = train_image_folder
-            config_data['train']['validation']['images']['directory'] = valid_image_folder
+            config_data["images"]["directory"] = train_image_folder
+            config_data["train"]["validation"]["images"][
+                "directory"] = valid_image_folder
 
             if options.label_folder:
-                config_data['labels']['directory'] = train_label_folder
-                config_data['train']['validation']['labels']['directory'] = valid_label_folder
+                config_data["labels"]["directory"] = train_label_folder
+                config_data["train"]["validation"]["labels"][
+                    "directory"] = valid_label_folder
 
-            with open(config_out_path, 'w') as f:
+            with open(config_out_path, "w") as f:
                 yaml.dump(config_data, f)
-            print('Wrote config file: ' + config_out_path)
+            print("Wrote config file: " + config_out_path)
 
-        except Exception as e: #pylint: disable=broad-except
-            print('Failed to copy config file!')
+        except Exception as e:  # pylint: disable=broad-except
+            print("Failed to copy config file!")
             print(str(e))
 
-    print('Wrote %d train files and %d validation files.' % (train_count, valid_count))
-    print('Done splitting input files!')
+    print("Wrote %d train files and %d validation files." %
+          (train_count, valid_count))
+    print("Done splitting input files!")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

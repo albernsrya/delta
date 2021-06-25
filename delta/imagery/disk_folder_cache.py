@@ -14,11 +14,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Caches large images.
 """
 import os
+
 
 class DiskCache:
     """
@@ -26,6 +26,7 @@ class DiskCache:
     It is safe to mix different datasets in the cache folder, though all items in
     the folder will count towards the limit.
     """
+
     def __init__(self, top_folder: str, limit: int):
         """
         Parameters
@@ -36,15 +37,17 @@ class DiskCache:
             Maximum number of items to keep in cache.
         """
         if limit < 1:
-            raise Exception('Illegal limit passed to Disk Cache: ' + str(limit))
+            raise Exception("Illegal limit passed to Disk Cache: " +
+                            str(limit))
 
         if not os.path.exists(top_folder):
             try:
                 os.mkdir(top_folder)
             except Exception as e:
-                raise Exception('Could not create disk cache folder: ' + top_folder) from e
+                raise Exception("Could not create disk cache folder: " +
+                                top_folder) from e
 
-        self._limit  = limit
+        self._limit = limit
         self._folder = top_folder
 
         self._item_list = []
@@ -105,7 +108,8 @@ class DiskCache:
         if self.num_cached() > self._limit:
             old_name = self._item_list.pop(0)
             old_path = self._full_path(old_name)
-            os.system('rm -rf ' + old_path) # Delete the entire old folder/file
+            os.system("rm -rf " +
+                      old_path)  # Delete the entire old folder/file
 
         # Return the full path to the new folder/file location
         return self._full_path(name)
@@ -113,7 +117,6 @@ class DiskCache:
     def _full_path(self, name):
         # Get the full path to one of the stored items by name
         return os.path.join(self._folder, name)
-
 
     def _update_items(self):
         """
@@ -126,5 +129,5 @@ class DiskCache:
             # Skip text files
             # -> It is important that we don't delete the list file if the user puts it here!
             ext = os.path.splitext(f)[1]
-            if ext not in ['.csv', 'txt']:
+            if ext not in [".csv", "txt"]:
                 self._item_list.append(f)

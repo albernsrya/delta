@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Run the MLFlow UI to visualize the history of training runs.
 """
@@ -22,6 +21,7 @@ import os
 
 from delta.config import config
 
+
 def main(_):
-    os.system('mlflow ui --backend-store-uri %s' % (config.mlflow.uri()))
+    os.system("mlflow ui --backend-store-uri %s" % (config.mlflow.uri()))
     return 0

@@ -14,13 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-'''
+"""
 .. include:: ../README.md
-'''
+"""
 
 import re
 import sys
 
 if sys.version_info < (3, 0, 0):
-    raise ImportError('DELTA code requires Python version >= 3.0.  Installed is %s' % (sys.version_info,))
+    raise ImportError(
+        "DELTA code requires Python version >= 3.0.  Installed is %s" %
+        (sys.version_info, ))

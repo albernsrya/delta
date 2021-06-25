@@ -15,24 +15,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#pylint:disable=redefined-outer-name, protected-access
+# pylint:disable=redefined-outer-name, protected-access
 """
 Test for worldview class.
 """
 import os
-import pytest
 
 import numpy as np
+import pytest
 
 from delta.extensions.sources import landsat, worldview
+
 
 @pytest.fixture(scope="function")
 def wv_image(worldview_filenames):
     return worldview.WorldviewImage(worldview_filenames[0])
 
+
 @pytest.fixture(scope="function")
 def landsat_image(landsat_filenames):
     return landsat.LandsatImage(landsat_filenames[0], bands=[1])
+
 
 # very basic, doesn't actually look at content
 def test_wv_image(wv_image):
@@ -48,6 +51,7 @@ def test_wv_image(wv_image):
     buf = wv_image.read()
     assert buf.shape == (64, 32, 1)
     assert buf[0, 0, 0] == 0.0
+
 
 def test_landsat_image(landsat_image):
     buf = landsat_image.read()
@@ -72,6 +76,7 @@ def test_landsat_image(landsat_image):
     assert buf.shape == (64, 32, 1)
     assert buf[0, 0, 0] == 0.0
 
+
 def test_wv_cache(wv_image):
     buf = wv_image.read()
     cached_path = wv_image._paths[0]
@@ -82,6 +87,7 @@ def test_wv_cache(wv_image):
     assert np.all(buf == buf2)
     assert new_image._paths[0] == cached_path
     assert os.path.getmtime(cached_path) == mod_time
+
 
 def test_landsat_cache(landsat_image):
     buf = landsat_image.read()

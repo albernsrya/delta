@@ -14,16 +14,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Simple helpful layers.
 """
 
 import tensorflow as tf
-import tensorflow.keras.layers
 import tensorflow.keras.backend as K
+import tensorflow.keras.layers
 
 from delta.config.extensions import register_layer
+
 
 class RepeatedGlobalAveragePooling2D(tensorflow.keras.layers.Layer):
     """
@@ -32,6 +32,7 @@ class RepeatedGlobalAveragePooling2D(tensorflow.keras.layers.Layer):
     Takes the global average over the entire input, and repeats
     it to return a tensor the same size as the input.
     """
+
     def compute_output_shape(self, input_shape):
         return input_shape
 
@@ -43,22 +44,27 @@ class RepeatedGlobalAveragePooling2D(tensorflow.keras.layers.Layer):
         mean = tf.expand_dims(mean, 1)
         return mean * ones
 
+
 class ReflectionPadding2D(tensorflow.keras.layers.Layer):
     """
     Add reflected padding of the given size surrounding the input.
     """
+
     def __init__(self, padding=(1, 1), **kwargs):
         super().__init__(**kwargs)
         self.padding = tuple(padding)
 
     def get_config(self):
         config = super().get_config()
-        config.update({'padding': self.padding})
+        config.update({"padding": self.padding})
         return config
 
     def call(self, inputs, **_):
-        w_pad,h_pad = self.padding
-        return tf.pad(inputs, [[0,0], [h_pad,h_pad], [w_pad,w_pad], [0,0] ], 'REFLECT')
+        w_pad, h_pad = self.padding
+        return tf.pad(inputs, [[0, 0], [h_pad, h_pad], [w_pad, w_pad], [0, 0]],
+                      "REFLECT")
 
-register_layer('RepeatedGlobalAveragePooling2D', RepeatedGlobalAveragePooling2D)
-register_layer('ReflectionPadding2D', ReflectionPadding2D)
+
+register_layer("RepeatedGlobalAveragePooling2D",
+               RepeatedGlobalAveragePooling2D)
+register_layer("ReflectionPadding2D", ReflectionPadding2D)

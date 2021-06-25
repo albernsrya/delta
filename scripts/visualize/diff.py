@@ -26,25 +26,31 @@ import numpy as np
 from delta.extensions.sources.tiff import TiffImage, TiffWriter
 from delta.imagery import rectangle
 
-assert len(sys.argv) == 3, 'Please specify two tiff files of the same size.'
+assert len(sys.argv) == 3, "Please specify two tiff files of the same size."
 
 img1 = TiffImage(sys.argv[1])
 img2 = TiffImage(sys.argv[2])
 
-output_image = TiffWriter('diff.tiff')
-output_image.initialize((img1.width(), img1.height(), 3), np.uint8, img1.metadata())
+output_image = TiffWriter("diff.tiff")
+output_image.initialize((img1.width(), img1.height(), 3), np.uint8,
+                        img1.metadata())
 
-assert img1.width()== img2.width() and img1.height() == img2.height() and \
-       img1.num_bands() == img2.num_bands(), 'Images must be same size.'
+assert (img1.width() == img2.width() and img1.height() == img2.height()
+        and img1.num_bands() == img2.num_bands()), "Images must be same size."
+
 
 def callback_function(roi, data):
     data2 = img2.read(roi)
-    diff = np.mean((data - data2) ** 2, axis=-1)
+    diff = np.mean((data - data2)**2, axis=-1)
     diff = np.uint8(np.clip(diff * 128.0, 0.0, 255.0))
     out = np.stack([diff, diff, diff], axis=-1)
     output_image.write(out, roi.min_x, roi.min_y)
 
-input_bounds = rectangle.Rectangle(0, 0, width=img1.width(), height=img1.height())
+
+input_bounds = rectangle.Rectangle(0,
+                                   0,
+                                   width=img1.width(),
+                                   height=img1.height())
 output_rois = input_bounds.make_tile_rois((2048, 2048), include_partials=True)
 
 img1.process_rois(output_rois, callback_function, show_progress=True)

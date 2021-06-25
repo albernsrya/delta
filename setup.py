@@ -17,14 +17,15 @@
 
 import os
 import os.path
+
 import setuptools
 
 with open("README.md", "r") as f:
     long_description = f.read()
 
 scripts = []
-for n in os.listdir('bin'):
-    name = os.path.join('bin', n)
+for n in os.listdir("bin"):
+    name = os.path.join("bin", n)
     if os.path.isfile(name) and os.access(name, os.X_OK):
         scripts.append(name)
 
@@ -43,22 +44,16 @@ setuptools.setup(
         "License :: OSI Approved :: Apache Software License",
         "Topic :: Scientific/Engineering :: Image Recognition",
         "Topic :: Scientific/Engineering :: GIS",
-        "Operating System :: OS Independent"
+        "Operating System :: OS Independent",
     ],
     install_requires=[
-        'tensorflow>=2.1',
-        'usgs<0.3',
-        'scipy',
-        'matplotlib',
-        'mlflow',
-        'portalocker',
-        'appdirs',
-        'gdal'
-        #'numpy', # these are included by tensorflow with restrictions
-        #'h5py'
+        "tensorflow>=2.1", "usgs<0.3", "scipy", "matplotlib", "mlflow",
+        "portalocker", "appdirs", "gdal"
+        # 'numpy', # these are included by tensorflow with restrictions
+        # 'h5py'
     ],
     scripts=scripts,
-    include_package_data = True,
-    package_data = {'' : ['*.cfg']},
-    python_requires='>=3.5',
+    include_package_data=True,
+    package_data={"": ["*.cfg"]},
+    python_requires=">=3.5",
 )

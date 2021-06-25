@@ -14,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """
 Gaussian sampling layer, used in variational autoencoders.
 """
@@ -24,6 +23,7 @@ from tensorflow.keras.callbacks import Callback
 
 from delta.config.extensions import register_layer
 from delta.ml.train import DeltaLayer
+
 
 # If layers inherit from callback as well we add them automatically on fit
 class GaussianSample(DeltaLayer):
@@ -40,20 +40,22 @@ class GaussianSample(DeltaLayer):
         """
         super().__init__(**kwargs)
         self._use_kl_loss = kl_loss
-        self._kl_enabled = K.variable(0.0, name=self.name + ':kl_enabled')
+        self._kl_enabled = K.variable(0.0, name=self.name + ":kl_enabled")
         self.trainable = False
 
     def get_config(self):
         config = super().get_config()
-        config.update({'kl_loss': self._use_kl_loss})
+        config.update({"kl_loss": self._use_kl_loss})
         return config
 
     def callback(self):
         kl_enabled = self._kl_enabled
+
         class GaussianSampleCallback(Callback):
-            def on_epoch_begin(self, epoch, _=None): # pylint:disable=no-self-use
+            def on_epoch_begin(self, epoch, _=None):  # pylint:disable=no-self-use
                 if epoch > 0:
                     K.set_value(kl_enabled, 1.0)
+
         return GaussianSampleCallback()
 
     def call(self, inputs, **_):
@@ -70,13 +72,17 @@ class GaussianSample(DeltaLayer):
             kl_loss = 0.5 * K.mean(kl_loss)
 
             # reduce relative weight compared to mean squared error
-            kl_loss /= K.cast(batch * dim[0] * dim[1] * dim[2], dtype='float32')
+            kl_loss /= K.cast(batch * dim[0] * dim[1] * dim[2],
+                              dtype="float32")
 
             kl_loss *= self._kl_enabled
 
             self.add_loss(kl_loss)
-            self.add_metric(kl_loss, aggregation='mean', name=self.name + '_kl_loss')
+            self.add_metric(kl_loss,
+                            aggregation="mean",
+                            name=self.name + "_kl_loss")
 
         return result
 
-register_layer('GaussianSample', GaussianSample)
+
+register_layer("GaussianSample", GaussianSample)
